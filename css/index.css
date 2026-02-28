@@ -15,7 +15,7 @@
 
 }
 
-#add_button {
+#open_modal_window_button {
 
 }
 
@@ -28,7 +28,6 @@
 }
 
 .modal {
-    /* скрыто по умолчанию */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -36,13 +35,12 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.modal-content {
+.modal_content {
     background: white;
     padding: 20px;
     width: 300px;
@@ -50,7 +48,7 @@
     position: relative;
 }
 
-.close {
+#close_modal_window_button {
     position: absolute;
     top: 8px;
     right: 12px;
