@@ -94,11 +94,20 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // Функция для правильного склонения слова "задача"
+    function declOfNum(number, titles) {
+        let cases = [2, 0, 1, 1, 1, 2];
+        return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+    }
+
     // Обновление всех счетчиков задач (во всех колонках)
     function updateAllCounters() {
-        doTaskCnt.textContent = `${doTaskContainer.querySelectorAll(".task_item").length} задач`;
-        inWorkTaskCnt.textContent = `${inWorkTaskContainer.querySelectorAll(".task_item").length} задач`;
-        doneTaskCnt.textContent = `${doneTaskContainer.querySelectorAll(".task_item").length} задач`;
+        const doCount = doTaskContainer.querySelectorAll(".task_item").length;
+        const inWorkCount = inWorkTaskContainer.querySelectorAll(".task_item").length;
+        const doneCount = doneTaskContainer.querySelectorAll(".task_item").length;
+        doTaskCnt.textContent = `${doCount} ${declOfNum(doCount, ['задача', 'задачи', 'задач'])}`;
+        inWorkTaskCnt.textContent = `${inWorkCount} ${declOfNum(inWorkCount, ['задача', 'задачи', 'задач'])}`;
+        doneTaskCnt.textContent = `${doneCount} ${declOfNum(doneCount, ['задача', 'задачи', 'задач'])}`;
     }
 
     // Добавление или изменение задачи
