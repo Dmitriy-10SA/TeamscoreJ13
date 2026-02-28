@@ -1,36 +1,65 @@
+/* Настройки для главных овалов статуса (верхних, где статус и счетчики) */
+/* Для размещения колонок статусов по горизонтали */
 .main_div {
     display: flex;
     gap: 20px;
 }
 
+/* Для одинакового места, которые занимают по горизонтали колонки статусов */
 .column {
     flex: 1;
 }
 
-.main_sub_div {
-    border: 1px solid black;
+/* Базовые настройки для самых главных овалов (верхних) в колонках статуса */
+.do_task_main_sub_div, .in_work_task_main_sub_div, .done_task_main_sub_div {
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 18px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
 }
 
-.task_container {
-
+.do_task_main_sub_div {
+    background-color: #E75656;
 }
 
-.task_item.dragging {
-    opacity: 0.5;
+.in_work_task_main_sub_div {
+    background-color: #4DADD6;
 }
 
-#open_modal_window_button {
-
+.done_task_main_sub_div {
+    background-color: rgb(150, 204, 32);
 }
 
-.task_item div {
-    margin-top: 12px;
-    border: 1px solid black;
+#do_task_cnt, #in_work_task_cnt, #done_task_cnt {
+    font-size: 12px;
+    color: #ffffff;
+    font-family: sans-serif;
+}
+
+.do_task_main_sub_div > div:first-child,
+.in_work_task_main_sub_div > div:first-child,
+.done_task_main_sub_div > div:first-child {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
+#open_modal_window_button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+/* Настройки для модального окна */
+/* Модальное окно - общий фон */
 .modal {
     position: fixed;
     z-index: 1000;
@@ -38,24 +67,124 @@
     top: 0;
     width: 100%;
     height: 100%;
+    overflow: auto;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
+    animation: fadeIn 0.3s ease;
 }
 
+/* Содержимое модального окна */
 .modal_content {
-    background: white;
-    padding: 20px;
-    width: 300px;
-    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 30px 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
 }
 
+/* Верхний текст модального окна */
+#modal_window_upper_text {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Кнопка закрытия в правом верхнем углу */
 #close_modal_window_button {
     position: absolute;
-    top: 8px;
-    right: 12px;
+    top: 10px;
+    right: 15px;
     font-size: 24px;
+    font-weight: bold;
+    color: black;
     cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+/* Текстовое поле задачи */
+#task_title_in_modal_textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: none;
+    margin-bottom: 20px;
+    font-family: sans-serif;
+}
+
+/* Кнопка добавления задачи */
+#add_task_button {
+    background-color: #4DADD6;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Настройки для карточек задач */
+/* Общий стиль карточек задач */
+.task_item {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-family: sans-serif;
+}
+
+/* Эффект при перетаскивании */
+.task_item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+
+/* Внутренний контейнер карточки */
+.task_item div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Название задачи */
+.task_item span {
+    font-size: 16px;
+    color: #333;
+    word-break: break-word;
+}
+
+/* Блок кнопок редактирования и удаления */
+.task_item div > div {
+    display: flex;
+    gap: 8px;
+}
+
+/* Кнопки редактирования и удаления */
+.task_item button.edit,
+.task_item button.delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 0.2s ease;
+}
+
+/* Добавление небольшого отступа между задачами */
+.task_container {
+    display: flex;
+    flex-direction: column;
 }
