@@ -1,54 +1,84 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Кнопки (без кнопки внутри модального окна)
+    // Кнопки для открытия и закрытия модального окна
     const openModalWindowButton = document.getElementById("open_modal_window_button");
     const closeModalWindowButton = document.getElementById("close_modal_window_button");
 
-    // Модальное окно (а также кнопка и textarea)
+    // Кнопка для добавления/изменения задачи
+    const addTaskButton = document.getElementById("add_task_button");
+
+    // Модальное окно, верхний текст внутри модального окна и title задачи (также внутри модального окна)
     const modalWindow = document.getElementById("modal_window");
     const modalWindowUpperText = document.getElementById("modal_window_upper_text");
-    const addTaskButton = document.getElementById("add_task_button");
     const taskTitleInModalTextarea = document.getElementById("task_title_in_modal_textarea");
+
+    // Колонки с задачами и контейнеры для них
+    const doTaskColumn = document.getElementById("do_task_column");
+    const doTaskContainer = document.getElementById("do_task_container");
+    const inWorkTaskColumn = document.getElementById("in_work_task_column");
+    const inWorkTaskContainer = document.getElementById("in_work_task_container");
+    const doneTaskColumn = document.getElementById("done_task_column");
+    const doneTaskContainer = document.getElementById("done_task_container");
 
     // Счетчики задач внутри колонок
     const doTaskCnt = document.getElementById("do_task_cnt");
     const inWorkTaskCnt = document.getElementById("in_work_task_cnt");
     const doneTaskCnt = document.getElementById("done_task_cnt");
 
-    // Колонки с задачами (контейнеры для них)
-    const doTaskContainer = document.getElementById("do_task_container");
-    const inWorkTaskContainer = document.getElementById("in_work_task_container");
-    const doneTaskContainer = document.getElementById("done_task_container");
-
+    // Ключи в LocalStorage (для хранения задач и последнего id)
     const STORAGE_TASKS_KEY = "tasks";
     const STORAGE_LAST_ID_KEY = "last_task_id";
 
+    // Задачи и последний id
     let tasks = loadTasksFromStorage();
     let lastTaskId = loadLastId();
 
+    // Задача для изменения и задача для Drag-and-Drop
     let taskBeingEdited = null;
+    let draggedTaskItem = null;
 
+    // Инициализация DragZone
+    function initDragZone(container, status) {
+        container.addEventListener("dragover", (e) => e.preventDefault());
+        container.addEventListener("drop", () => {
+            if (!draggedTaskItem) return;
+            const taskContainer = container.querySelector(".task_container");
+            taskContainer.appendChild(draggedTaskItem);
+            const id = Number(draggedTaskItem.dataset.id);
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = status;
+            }
+            updateAllCounters();
+        });
+    }
+
+    // Получение задач из LocalStorage
     function loadTasksFromStorage() {
         return JSON.parse(localStorage.getItem(STORAGE_TASKS_KEY)) || [];
     }
 
+    // Сохранение задач в LocalStorage
     function saveTasksToStorage(tasks) {
         localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(tasks));
     }
 
+    // Получение последнего id из LocalStorage
     function loadLastId() {
         return Number(localStorage.getItem(STORAGE_LAST_ID_KEY)) || 0;
     }
 
+    // Сохранение последнего id в LocalStorage
     function saveLastId(id) {
         localStorage.setItem(STORAGE_LAST_ID_KEY, id);
     }
 
+    // Закрытие модального окна
     function closeModalWindow() {
         modalWindow.style.display = "none";
     }
 
-    // Инициализация всех действий с модальным окном
-    function initModalWindow() {
+    // Инициализация модального окна и всех действий с модальным окном
+    function initModalWindowAndActions() {
         modalWindow.style.display = 'none';
         openModalWindowButton.onclick = () => {
             taskTitleInModalTextarea.value = "";
@@ -64,29 +94,37 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function updateCounter() {
-        const count = doTaskContainer.querySelectorAll(".task_item").length;
-        doTaskCnt.textContent = `${count} задач`;
+    // Обновление всех счетчиков задач (во всех колонках)
+    function updateAllCounters() {
+        doTaskCnt.textContent = `${doTaskContainer.querySelectorAll(".task_item").length} задач`;
+        inWorkTaskCnt.textContent = `${inWorkTaskContainer.querySelectorAll(".task_item").length} задач`;
+        doneTaskCnt.textContent = `${doneTaskContainer.querySelectorAll(".task_item").length} задач`;
     }
 
-    function createTask(text, status = "do", id = null, saveToStorage = true) {
+    // Добавление или изменение задачи
+    function createOrEditTask(text, status = "do", id = null, saveToStorage = true) {
         const taskId = id ?? ++lastTaskId;
-        saveLastId(lastTaskId);
-
         const taskItem = document.createElement("div");
+        taskItem.draggable = true;
+        taskItem.addEventListener("dragstart", () => {
+            draggedTaskItem = taskItem;
+            taskItem.classList.add("dragging");
+        });
+        taskItem.addEventListener("dragend", () => {
+            draggedTaskItem = null;
+            taskItem.classList.remove("dragging");
+        });
         taskItem.className = "task_item";
         taskItem.dataset.id = taskId.toString();
-
         taskItem.innerHTML = `
-        <div>
-            <span>${text}</span>
             <div>
-                <button class="edit">✏️</button>
-                <button class="delete">🗑️</button>
+                <span>${text}</span>
+                <div>
+                    <button class="edit">✏️</button>
+                    <button class="delete">🗑️</button>
+                </div>
             </div>
-        </div>
-    `;
-
+        `;
         taskItem.querySelector(".edit").onclick = () => {
             taskBeingEdited = taskItem;
             taskTitleInModalTextarea.value = text;
@@ -94,23 +132,37 @@ document.addEventListener('DOMContentLoaded', () => {
             addTaskButton.textContent = "Сохранить";
             modalWindow.style.display = "flex";
         };
-
         taskItem.querySelector(".delete").onclick = () => {
             tasks = tasks.filter(t => t.id !== taskId);
-            saveTasksToStorage(tasks);
             taskItem.remove();
-            updateCounter();
+            updateAllCounters();
         };
-
-        doTaskContainer.appendChild(taskItem);
-
-        // сохраняем в storage
+        const container = status === "do" ? doTaskContainer :
+            status === "in_work" ? inWorkTaskContainer : doneTaskContainer;
+        container.appendChild(taskItem);
         if (saveToStorage) {
-            tasks.push({ id: taskId, title: text, status });
-            saveTasksToStorage(tasks);
+            tasks.push({id: taskId, title: text, status});
         }
+        taskBeingEdited = null;
     }
 
+    // Рендеринг задач из LocalStorage
+    function renderTasksFromStorage() {
+        tasks.forEach(task => {
+            if (task.status === "do") {
+                createOrEditTask(task.title, task.status, task.id, false);
+            }
+            if (task.status === "in_work") {
+                createOrEditTask(task.title, task.status, task.id, false);
+            }
+            if (task.status === "done") {
+                createOrEditTask(task.title, task.status, task.id, false);
+            }
+        });
+        updateAllCounters();
+    }
+
+    // Действие по клику на кнопку добавления задачи в модальном окне
     addTaskButton.onclick = () => {
         const text = taskTitleInModalTextarea.value.trim();
         if (!text) {
@@ -118,33 +170,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (taskBeingEdited) {
             const id = Number(taskBeingEdited.dataset.id);
-
             taskBeingEdited.querySelector("span").textContent = text;
-
             const task = tasks.find(t => t.id === id);
             if (task) {
                 task.title = text;
-                saveTasksToStorage(tasks);
             }
+            taskBeingEdited = null;
         } else {
-            createTask(text);
+            createOrEditTask(text);
         }
         closeModalWindow();
-        updateCounter();
+        updateAllCounters();
     };
 
-    function renderTasksFromStorage() {
-        tasks.forEach(task => {
-            if (task.status === "do") {
-                createTask(task.title, task.status, task.id, false);
-            }
-            // позже добавим in_work и done
-        });
+    // Сохраняем задачи и последний id перед закрытием в LocalStorage
+    window.addEventListener("beforeunload", () => {
+        saveTasksToStorage(tasks);
+        saveLastId(lastTaskId);
+    });
 
-        updateCounter();
-    }
-
+    // Инициализация задач и модального окна
     renderTasksFromStorage();
+    initModalWindowAndActions();
 
-    initModalWindow();
+    // Инициализация DragZone
+    initDragZone(doTaskColumn, "do");
+    initDragZone(inWorkTaskColumn, "in_work");
+    initDragZone(doneTaskColumn, "done");
 });

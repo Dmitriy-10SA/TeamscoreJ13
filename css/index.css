@@ -15,6 +15,10 @@
 
 }
 
+.task_item.dragging {
+    opacity: 0.5;
+}
+
 #open_modal_window_button {
 
 }
