@@ -7,6 +7,7 @@
     <title>Список задач</title>
 </head>
 <body>
+<!-- Основной контент -->
 <div class="main_div">
     <div class="column">
         <div class="main_sub_div">
@@ -42,6 +43,38 @@
         </div>
         <div id="done_task_container" class="task_container"></div>
     </div>
+
+    <!-- Модальное окно добавления/изменения задачи -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Добавить новую задачу</h3>
+            <label for="taskDesc"></label><textarea id="taskDesc" placeholder="Напишите задачу" rows="3"></textarea>
+            <button>Добавить</button>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("taskModal");
+        const openBtn = document.getElementById("add_button");
+        const closeBtn = document.querySelector(".close");
+
+        openBtn.onclick = () => {
+            modal.style.display = "flex";
+        };
+
+        closeBtn.onclick = () => {
+            modal.style.display = "none";
+        };
+
+        // закрытие по клику на фон
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    </script>
+
 </div>
 </body>
 </html>
