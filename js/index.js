@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Закрытие модального окна
     function closeModalWindow() {
         modalWindow.style.display = "none";
+        taskBeingEdited = null;
     }
 
     // Инициализация модального окна и всех действий с модальным окном
@@ -84,15 +85,23 @@ document.addEventListener('DOMContentLoaded', () => {
             taskTitleInModalTextarea.value = "";
             modalWindowUpperText.textContent = "Добавить задачу";
             addTaskButton.textContent = "Добавить";
+            taskBeingEdited = null;
             modalWindow.style.display = "flex";
         }
         closeModalWindowButton.onclick = () => closeModalWindow();
         modalWindow.onclick = (e) => {
             if (e.target === modalWindow) {
-                modalWindow.style.display = "none";
+                closeModalWindow();
             }
         };
     }
+
+    // обработка нажатий Escape
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modalWindow.style.display === "flex") {
+            closeModalWindow();
+        }
+    });
 
     // Функция для правильного склонения слова "задача"
     function declOfNum(number, titles) {
